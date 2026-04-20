@@ -1,14 +1,20 @@
+import { useState } from 'react';
 import { FESTIVAL_START_DATE, FESTIVAL_END_DATE, TICKETS, isValidDateSequence } from '../utils/bookingLogic';
 import { useBookingViewModel } from '../viewmodels/useBookingViewModel';
 import { isBefore, isEqual, isAfter, format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { AnimatedPrice } from './AnimatedPrice';
 import { MagneticWrapper } from './MagneticWrapper';
+import { CustomerAuthModal } from './CustomerAuthModal';
 
 const TicketWidget = () => {
+  const navigate = useNavigate();
   const { state, actions } = useBookingViewModel();
   const { startDate, endDate, tier, guests, serverPrice, isAvailable, isLoading, errorStatus } = state;
   const { handleDateSelect, setTier, setGuests, handleCheckout } = actions;
+  
+  const [showAuth, setShowAuth] = useState(false);
 
   // Generate an array of dates from start to end for selection
   const festivalDates = [
@@ -22,6 +28,18 @@ const TicketWidget = () => {
     if (endDate && isEqual(date, endDate)) return true;
     if (startDate && endDate && isAfter(date, startDate) && isBefore(date, endDate)) return true;
     return false;
+  };
+
+  const executeCheckout = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setShowAuth(true);
+      return;
+    }
+    const success = await handleCheckout();
+    if (success) {
+      navigate('/portal');
+    }
   };
 
   return (
@@ -133,13 +151,22 @@ const TicketWidget = () => {
         <MagneticWrapper>
           <button 
             disabled={!startDate || !endDate || !isAvailable || !!errorStatus || isLoading}
-            onClick={handleCheckout}
+            onClick={executeCheckout}
             className="neon-button disabled:opacity-50 w-full sm:w-auto"
           >
             {(!startDate || !endDate) ? 'Select Dates' : (isLoading ? 'Processing' : 'Checkout')}
           </button>
         </MagneticWrapper>
       </div>
+      
+      <CustomerAuthModal 
+        isOpen={showAuth} 
+        onClose={() => setShowAuth(false)} 
+        onSuccess={() => {
+          setShowAuth(false);
+          executeCheckout();
+        }} 
+      />
     </motion.div>
   );
 };

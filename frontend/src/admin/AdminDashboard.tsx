@@ -30,9 +30,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem('token');
+        const headers = { 'Authorization': `Bearer ${token}` };
+
         const [availRes, resRes] = await Promise.all([
-          fetch(`${BASE_URL}/availability`),
-          fetch(`${BASE_URL}/reservations`)
+          fetch(`${BASE_URL}/availability`, { headers }),
+          fetch(`${BASE_URL}/reservations`, { headers })
         ]);
 
         const availData = await availRes.json();

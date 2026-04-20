@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Hero from './components/Hero';
 import Lineup from './components/Lineup';
 import TicketWidget from './components/TicketWidget';
 import NeonIntro from './components/NeonIntro';
+import { CustomerAuthModal } from './components/CustomerAuthModal';
 import { BookingProvider } from './context/BookingContext';
 
 export default function FestivalApp() {
   const [introVisible, setIntroVisible] = useState(true);
+  const [hasToken, setHasToken] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setHasToken(!!localStorage.getItem('token'));
+  }, []);
 
   return (
     <div className="neon-theme">
@@ -19,6 +28,18 @@ export default function FestivalApp() {
             )}
           </AnimatePresence>
           
+          <div className="absolute top-6 right-6 z-50">
+            <button 
+              onClick={() => {
+                if (hasToken) navigate('/portal');
+                else setShowAuth(true);
+              }}
+              className="text-xs uppercase tracking-widest font-bold border border-white/20 bg-black/50 backdrop-blur-md text-white py-2 px-6 rounded-full hover:border-neon-cyan hover:shadow-[0_0_15px_rgba(0,249,255,0.3)] transition-all"
+            >
+              {hasToken ? 'My Passes' : 'Log In'}
+            </button>
+          </div>
+
           <Hero />
 
           <Lineup />
@@ -40,6 +61,15 @@ export default function FestivalApp() {
           </footer>
         </div>
       </BookingProvider>
+      <CustomerAuthModal 
+        isOpen={showAuth} 
+        onClose={() => setShowAuth(false)} 
+        onSuccess={() => {
+          setHasToken(true);
+          setShowAuth(false);
+          navigate('/portal');
+        }} 
+      />
     </div>
   );
 }

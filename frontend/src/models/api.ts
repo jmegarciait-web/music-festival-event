@@ -31,9 +31,13 @@ export class ApiModel {
   }
 
   static async reserve(payload: BookingPayload): Promise<{ reservationId: number, totalPrice: number }> {
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const res = await fetch(`${BASE_URL}/reserve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload)
     });
     const data = await res.json();

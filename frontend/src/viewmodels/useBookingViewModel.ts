@@ -61,8 +61,8 @@ export const useBookingViewModel = () => {
     }
   };
 
-  const handleCheckout = async () => {
-    if (!startDate || !endDate || !isAvailable) return;
+  const handleCheckout = async (): Promise<boolean> => {
+    if (!startDate || !endDate || !isAvailable) return false;
     
     try {
       setIsLoading(true);
@@ -72,10 +72,11 @@ export const useBookingViewModel = () => {
         tier,
         guests
       });
-      alert(`Success! Reservation ID: ${res.reservationId}. Total Charged: $${res.totalPrice}`);
-      // Usually trigger redirect to success screen here
+      // Removing old alert logic since we migrate entirely to digital portal
+      return true;
     } catch (err: any) {
       alert(`Checkout failed: ${err.message}`);
+      return false;
     } finally {
       setIsLoading(false);
     }
