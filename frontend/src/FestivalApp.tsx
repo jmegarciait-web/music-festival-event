@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Hero from './components/Hero';
+import Lineup from './components/Lineup';
 import TicketWidget from './components/TicketWidget';
 import NeonIntro from './components/NeonIntro';
 import { BookingProvider } from './context/BookingContext';
@@ -19,6 +20,8 @@ export default function FestivalApp() {
           </AnimatePresence>
           
           <Hero />
+
+          <Lineup />
           
           {/* Ticket Booking Section */}
           <section className="relative py-32 px-6 min-h-screen flex items-center justify-center">
