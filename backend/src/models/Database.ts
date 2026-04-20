@@ -32,7 +32,8 @@ class DatabaseModel {
         tier TEXT,
         guests INTEGER,
         totalPrice INTEGER,
-        userId INTEGER
+        userId INTEGER,
+        status TEXT DEFAULT 'active'
       );
 
       CREATE TABLE IF NOT EXISTS users (
@@ -46,9 +47,11 @@ class DatabaseModel {
     // Handle migration for existing schema
     try {
       await this.db.exec(`ALTER TABLE reservations ADD COLUMN userId INTEGER`);
-    } catch (e) {
-      // Ignore if column already exists
-    }
+    } catch (e) {}
+
+    try {
+      await this.db.exec(`ALTER TABLE reservations ADD COLUMN status TEXT DEFAULT 'active'`);
+    } catch (e) {}
 
     // Seed mock data
     const tiers = ['GA', 'VIP'];
@@ -115,6 +118,38 @@ class DatabaseModel {
   async getAvailability(): Promise<AvailabilityRecord[]> {
     if (!this.db) throw new Error("DB not init");
     return this.db.all('SELECT * FROM availability ORDER BY date ASC, tier DESC');
+  }
+
+  async scanTicket(id: number): Promise<boolean> {
+    if (!this.db) throw new Error("DB not init");
+    
+    // Check current status
+    const row = await this.db.get('SELECT status FROM reservations WHERE id = ?', [id]);
+    if (!row) throw new Error("Ticket not found");
+    if (row.status !== 'active') return false; // Already scanned or refunded
+
+    await this.db.run("UPDATE reservations SET status = 'scanned' WHERE id = ?", [id]);
+    return true;
+  }
+
+  async refundTicket(id: number): Promise<boolean> {
+    if (!this.db) throw new Error("DB not init");
+    
+    // Get ticket info for refund
+    const ticket = await this.db.get('SELECT * FROM reservations WHERE id = ?', [id]);
+    if (!ticket) throw new Error("Ticket not found");
+    if (ticket.status === 'refunded') throw new Error("Ticket has already been refunded");
+    
+    // Update ticket status
+    await this.db.run("UPDATE reservations SET status = 'refunded' WHERE id = ?", [id]);
+
+    // Restore availability pool
+    await this.db.run(
+      `UPDATE availability SET remaining = remaining + ? WHERE date >= ? AND date <= ? AND tier = ?`,
+      [ticket.guests, ticket.startDate, ticket.endDate, ticket.tier]
+    );
+
+    return true;
   }
 
   async getReservations(): Promise<any[]> {

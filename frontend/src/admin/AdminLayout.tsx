@@ -9,6 +9,7 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import LogoutIcon from '@mui/icons-material/Logout';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import { adminTheme } from './AdminTheme';
 
 const drawerWidth = 240;
@@ -166,18 +167,33 @@ export default function AdminLayout() {
               </ListItem>
 
               {(role === 'admin' || role === 'super_admin') && (
-                <ListItem disablePadding>
-                  <ListItemButton 
-                    component={Link} 
-                    to="/admin/users"
-                    selected={location.pathname === '/admin/users'}
-                  >
-                    <ListItemIcon>
-                      <PeopleIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="User Management" />
-                  </ListItemButton>
-                </ListItem>
+                <>
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      component={Link} 
+                      to="/admin/users"
+                      selected={location.pathname === '/admin/users'}
+                    >
+                      <ListItemIcon>
+                        <PeopleIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="User Management" />
+                    </ListItemButton>
+                  </ListItem>
+                  
+                  <ListItem disablePadding>
+                    <ListItemButton 
+                      component={Link} 
+                      to="/admin/tickets"
+                      selected={location.pathname === '/admin/tickets'}
+                    >
+                      <ListItemIcon>
+                        <QrCodeScannerIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Ticket Ops" />
+                    </ListItemButton>
+                  </ListItem>
+                </>
               )}
             </List>
           </Box>

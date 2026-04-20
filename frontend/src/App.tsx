@@ -4,6 +4,7 @@ import FestivalApp from './FestivalApp';
 import AdminLayout from './admin/AdminLayout';
 import AdminDashboard from './admin/AdminDashboard';
 import UserManagement from './admin/UserManagement';
+import TicketsManager from './admin/TicketsManager';
 import { CustomerPortal } from './components/CustomerPortal';
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="tickets" element={<TicketsManager />} />
         </Route>
       </Routes>
     </Router>

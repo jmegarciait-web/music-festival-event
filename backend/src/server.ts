@@ -169,7 +169,31 @@ app.post('/api/admin/users', authenticateJWT, authorizeRoles('super_admin', 'adm
   }
 });
 
-const PORT = 3001;
+app.post('/api/admin/reservations/:id/scan', authenticateJWT, authorizeRoles('super_admin', 'admin'), async (req, res) => {
+  try {
+    const id = parseInt(req.params.id as string, 10);
+    const success = await dbModel.scanTicket(id);
+    if (success) {
+      res.json({ success: true, message: 'Ticket Scanned Valid' });
+    } else {
+      res.status(400).json({ success: false, message: 'Ticket already scanned or refunded' });
+    }
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+app.post('/api/admin/reservations/:id/refund', authenticateJWT, authorizeRoles('super_admin', 'admin'), async (req, res) => {
+  try {
+    const id = parseInt(req.params.id as string, 10);
+    await dbModel.refundTicket(id);
+    res.json({ success: true, message: 'Ticket refunded and availability restored' });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
   await dbModel.init();
   console.log(`Backend server running on http://localhost:${PORT}`);
